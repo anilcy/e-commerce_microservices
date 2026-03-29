@@ -1,8 +1,10 @@
 using Catalog.API.Features.Products.Commands;
 using Catalog.API.Features.Products.Queries;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Messaging.Events;
 
 namespace Catalog.API.Controllers;
 
@@ -11,8 +13,13 @@ namespace Catalog.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public ProductsController(IMediator mediator) => _mediator = mediator;
+    public ProductsController(IMediator mediator, IPublishEndpoint publishEndpoint)
+    {
+        _mediator = mediator;
+        _publishEndpoint = publishEndpoint;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -38,4 +45,26 @@ public class ProductsController : ControllerBase
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
+
+    /// <summary>Update product name, description, price. Notifies Order Service automatically.</summary>
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductRequest request)
+    {
+        var result = await _mediator.Send(
+            new UpdateProductCommand(id, request.Name, request.Description, request.Price));
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    /// <summary>Deactivate a product so it no longer appears in listings.</summary>
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(Guid id)
+    {
+        var result = await _mediator.Send(new DeactivateProductCommand(id));
+        if (!result) return NotFound();
+        return NoContent();
+    }
 }
+
+public record UpdateProductRequest(string Name, string? Description, decimal Price);

@@ -20,7 +20,6 @@ public class OrdersController : ControllerBase
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? User.FindFirstValue("sub")!);
 
-    /// <summary>Place a new order.</summary>
     [HttpPost]
     public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest request)
     {
@@ -29,7 +28,6 @@ public class OrdersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.OrderId }, result);
     }
 
-    /// <summary>Get all orders for the current user.</summary>
     [HttpGet]
     public async Task<IActionResult> GetMyOrders()
     {
@@ -37,7 +35,6 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Get a specific order by ID.</summary>
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -45,7 +42,6 @@ public class OrdersController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
-    /// <summary>Cancel an order.</summary>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Cancel(Guid id)
     {
@@ -54,7 +50,7 @@ public class OrdersController : ControllerBase
     }
 }
 
-// Request DTO (separate from command to avoid coupling controller inputs to CQRS layer)
+// ── Simplified request — client only provides productId + quantity ─────────────
 public record PlaceOrderRequest(
     string? ShippingAddress,
-    List<Features.Orders.Commands.OrderItemRequest> Items);
+    List<OrderItemRequest> Items);

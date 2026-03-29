@@ -1,14 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "uNxA8WQ4Co8=",
+  "dgSpecHash": "TX6s35jHovg=",
   "success": true,
-  "projectFilePath": "/Users/anily/Desktop/ecommerce-microservices/src/Gateway/Gateway.API/Gateway.API.csproj",
+  "projectFilePath": "C:\\Users\\Anıl\\RiderProjects\\e-commerce_microservices\\src\\Gateway\\Gateway.API\\Gateway.API.csproj",
   "expectedPackageFiles": [
-    "/Users/anily/.nuget/packages/system.io.hashing/7.0.0/system.io.hashing.7.0.0.nupkg.sha512",
-    "/Users/anily/.nuget/packages/yarp.reverseproxy/2.1.0/yarp.reverseproxy.2.1.0.nupkg.sha512",
-    "/Users/anily/.nuget/packages/microsoft.netcore.app.ref/8.0.12/microsoft.netcore.app.ref.8.0.12.nupkg.sha512",
-    "/Users/anily/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.12/microsoft.aspnetcore.app.ref.8.0.12.nupkg.sha512",
-    "/Users/anily/.nuget/packages/microsoft.netcore.app.host.osx-arm64/8.0.12/microsoft.netcore.app.host.osx-arm64.8.0.12.nupkg.sha512"
+    "C:\\Users\\Anıl\\.nuget\\packages\\system.io.hashing\\7.0.0\\system.io.hashing.7.0.0.nupkg.sha512",
+    "C:\\Users\\Anıl\\.nuget\\packages\\yarp.reverseproxy\\2.1.0\\yarp.reverseproxy.2.1.0.nupkg.sha512"
   ],
   "logs": []
 }

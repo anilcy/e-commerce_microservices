@@ -10,7 +10,7 @@ public class User
     public DateTime CreatedAt { get; private set; }
     public bool IsActive { get; private set; }
 
-    private User() { } // EF Core
+    private User() { }
 
     public static User Create(string email, string username, string passwordHash)
     {
@@ -21,7 +21,23 @@ public class User
             Username = username,
             PasswordHash = passwordHash,
             CreatedAt = DateTime.UtcNow,
-            IsActive = true
+            IsActive = true,
+            Role = "Customer"
+        };
+    }
+
+    // Separate factory method for admin — makes intent explicit
+    public static User CreateAdmin(string email, string username, string passwordHash)
+    {
+        return new User
+        {
+            Id = Guid.NewGuid(),
+            Email = email.ToLowerInvariant(),
+            Username = username,
+            PasswordHash = passwordHash,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+            Role = "Admin"
         };
     }
 

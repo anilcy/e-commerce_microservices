@@ -1,3 +1,4 @@
+using Catalog.API.Infrastructure;
 using Catalog.API.Infrastructure.Consumers;
 using Catalog.API.Infrastructure.Persistence;
 using FluentValidation;
@@ -5,6 +6,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,6 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddMassTransit(x =>
 {
-    // Register consumer — Catalog listens for orders to reserve stock
     x.AddConsumer<OrderPlacedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
@@ -33,7 +34,6 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// JWT validation — Catalog trusts tokens issued by Identity Service
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
     {
@@ -53,14 +53,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer {token}",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
+// ── Migrate + Seed on startup ─────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     db.Database.Migrate();
+    await DataSeeder.SeedAsync(db); // ← seeds default categories
 }
 
 app.UseSwagger();

@@ -25,6 +25,12 @@ public record OrderCancelledEvent(
     Guid UserId,
     DateTime CancelledAt);
 
+public record OrderConfirmedEvent(
+    Guid OrderId,
+    Guid UserId,
+    decimal TotalAmount,
+    DateTime ConfirmedAt);
+
 // Published by Catalog Service
 public record StockReservedEvent(
     Guid OrderId,
@@ -37,3 +43,15 @@ public record ProductCreatedEvent(
     decimal Price,
     int Stock,
     DateTime CreatedAt);
+
+// NEW — published when a product's name or price changes
+public record ProductUpdatedEvent(
+    Guid ProductId,
+    string Name,
+    decimal Price,
+    DateTime UpdatedAt);
+
+// NEW — published when a product is deactivated
+public record ProductDeactivatedEvent(
+    Guid ProductId,
+    DateTime DeactivatedAt);

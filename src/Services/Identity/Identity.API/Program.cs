@@ -1,5 +1,6 @@
 using FluentValidation;
 using Identity.API.Features.Auth.Commands;
+using Identity.API.Infrastructure;
 using Identity.API.Infrastructure.Persistence;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -65,15 +66,30 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey
     });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 var app = builder.Build();
 
-// ── Migrate on startup ────────────────────────────────────────────────────────
+// ── Migrate + Seed on startup ─────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
     db.Database.Migrate();
+    await DataSeeder.SeedAsync(db); // ← creates admin user if not exists
 }
 
 app.UseSwagger();
